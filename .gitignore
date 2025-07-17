@@ -25,3 +25,35 @@ replay_pid*
 
 # Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
 .kotlin/
+
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.idea/*
+.idea
+
+Building/**
+Building
+./protobuf*/**
+./protobuf/**
+protobuf
+protobuf**/**
+
+.DS_Store
+/build
+**/*build/**
+
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+
+coreold/src/main/cpp/.idea
+coreold/src/main/cpp/**build**
