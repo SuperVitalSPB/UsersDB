@@ -13,8 +13,8 @@ interface UserDao {
     @Query("SELECT * FROM users")
     fun getUsers(): LiveData<List<User>>
 
-    @Query("SELECT count(*) FROM users WHERE userName = :nameUser")
-    fun existsName(nameUser: String): LiveData<List<Int>>
+    @Query("SELECT count(*) FROM users WHERE userName = :userName")
+    fun getCountUsers(userName: String): List<Int>
 
     @Insert
     fun addUser(user: User)

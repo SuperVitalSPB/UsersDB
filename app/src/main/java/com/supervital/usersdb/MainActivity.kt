@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -89,7 +90,7 @@ fun MainScreen() {
 @Composable
 fun Main(vm: UserViewModel) {
     val userList by vm.userList.observeAsState(listOf())
-
+    val isUserNameExists by vm.foundUsers.observeAsState( false)
     var name by remember { vm.userName }
     var resultCheck by remember { vm.resultCheck }
 
@@ -99,7 +100,17 @@ fun Main(vm: UserViewModel) {
             label = { Text("Name") },
             modifier = Modifier
                 .padding(8.dp),
-            onValueChange = { vm.changeName(it) }
+            onValueChange = { vm.changeName(it) },
+            isError = isUserNameExists,
+            supportingText = {
+                if (isUserNameExists) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "User name Exists",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         )
 
         OutlinedTextField(

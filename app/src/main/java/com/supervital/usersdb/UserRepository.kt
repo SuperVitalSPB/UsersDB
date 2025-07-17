@@ -1,6 +1,7 @@
 package com.example.metanitdatabase
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.supervital.usersdb.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,10 +13,7 @@ class UserRepository(private val userDao : UserDao) {
 
     val userList: LiveData<List<User>> = userDao.getUsers()
 
-    fun existsName(userName: String): LiveData<List<Int>> {
-         return userDao.existsName(userName)
-    }
-
+    fun getCountUsers(userName: String) = userDao.getCountUsers(userName)
 
     fun addUser(user: User) {
         coroutineScope.launch(Dispatchers.IO) {

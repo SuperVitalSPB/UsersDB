@@ -1,20 +1,27 @@
 package com.example.metanitdatabase
 
 import android.app.Application
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.supervital.usersdb.ResultCheck
 import com.supervital.usersdb.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class UserViewModel(application: Application) : ViewModel() {
     val userList: LiveData<List<User>>
     private val repository: UserRepository
     var userName = mutableStateOf("")
     var resultCheck = mutableStateOf(Any())
-    var userAge = mutableStateOf("")
+    var userAge = mutableStateOf("12")
+    private val _foundUsers = MutableLiveData<Boolean>()
+    val foundUsers: LiveData<Boolean> = _foundUsers
+
 
     init {
         // Строит базу данных (если она еще не существует)
@@ -28,10 +35,24 @@ class UserViewModel(application: Application) : ViewModel() {
     fun changeName(value: String) {
         userName.value = value
         checkData()
+        checkNameExists()
+    }
+
+    fun checkNameExists() {
+        if (userName.value.isEmpty()) {
+            return
+        }
+        viewModelScope.launch (Dispatchers.IO ) {
+            val isError = repository.getCountUsers(userName.value).get(0) != 0
+            _foundUsers.postValue(isError)
+            if (isError && resultCheck.value is ResultCheck.ResultOk) {
+                resultCheck.value = ResultCheck.NameExists()
+            }
+        }
     }
 
     fun changeAge(value: String) {
-        if(value.length > 0 && !value.isNumeric()) {
+        if(value.isNotEmpty() && !value.isNumeric()) {
             return
         }
         userAge.value = value
@@ -40,18 +61,12 @@ class UserViewModel(application: Application) : ViewModel() {
 
     fun checkData() {
         resultCheck.value = when {
-            userName.value.isNullOrEmpty() -> ResultCheck.NameMustEnter()
+            userName.value.isEmpty() -> ResultCheck.NameMustEnter()
             userAge.value.length == 0 || !userAge.value.isNumeric() -> ResultCheck.BadAge()
             else -> ResultCheck.ResultOk()
         }
-/*
-        if (resultCheck.value is ResultCheck.ResultOk) {
-            repository.existsName(userName.value).observe() != 0 -> ResultCheck.NameExists()
-            resultCheck.value
-            LiveData<List<Int>>
-        }
-*/
     }
+
     fun addUser() {
         repository.addUser(User(userName.value, userAge.value.toInt()))
     }
