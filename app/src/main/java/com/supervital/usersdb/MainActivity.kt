@@ -14,15 +14,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.metanitdatabase.UserViewModel
 import com.example.metanitdatabase.UserViewModelFactory
 import com.supervital.usersdb.ui.theme.UsersDBTheme
+import kotlin.coroutines.coroutineContext
 import kotlin.toString
 
 class MainActivity : ComponentActivity() {
@@ -94,6 +101,9 @@ fun Main(vm: UserViewModel) {
     var name by remember { vm.userName }
     var resultCheck by remember { vm.resultCheck }
 
+    var isSelected by remember { mutableStateOf(false) }
+    var selectedId by remember { mutableStateOf(0) }
+
     Column {
         OutlinedTextField(
             value = name,
@@ -106,7 +116,7 @@ fun Main(vm: UserViewModel) {
                 if (isUserNameExists) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "User name Exists",
+                        text = vm.getStringUserNameExists,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
@@ -125,7 +135,14 @@ fun Main(vm: UserViewModel) {
         )
 
         Button(
-            onClick = { vm.addUser() },
+            onClick = {
+                vm.apply {
+                    addUser()
+                    userName.value = ""
+                    userAge.value = ""
+                    checkData()
+                }
+                      },
             enabled = resultCheck is ResultCheck.ResultOk,
             modifier = Modifier
                 .padding(8.dp),
@@ -142,11 +159,12 @@ fun Main(vm: UserViewModel) {
 }
 
 @Composable
-fun UserList(users: List<User>, delete: (Int) -> Unit) {
+fun UserList(users: List<User>,
+             delete: (Int) -> Unit) {
     LazyColumn(
         modifier =  Modifier.fillMaxWidth()
     ) {
-        item { UserTitleRow() }
+        item {UserTitleRow() }
         items(users) {
                 user -> UserRow(user) { delete(user.id) }
         }
@@ -155,10 +173,19 @@ fun UserList(users: List<User>, delete: (Int) -> Unit) {
 
 @Composable
 fun UserRow(user: User, onDelete: (Int) -> Unit) {
+    // val onItemClick = { id: Int -> selectedId = id }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(horizontal = 8.dp)
+            .background( if (user.id % 2 == 0)
+                    Color.Green
+                else
+                    Color.Transparent
+            )
+            .clickable{
+                // onItemClick.invoke(user.id)
+            }
     ) {
         Text(
             text = user.id.toString(),
@@ -193,6 +220,7 @@ fun UserTitleRow() {
             .background(Color.LightGray)
             .fillMaxWidth()
             .padding(8.dp)
+            //.clickable()
     ) {
         Text(
             text = "ID",

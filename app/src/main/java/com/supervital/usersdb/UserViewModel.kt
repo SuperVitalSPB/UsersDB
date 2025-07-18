@@ -8,20 +8,22 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.supervital.usersdb.R
 import com.supervital.usersdb.ResultCheck
 import com.supervital.usersdb.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class UserViewModel(application: Application) : ViewModel() {
+class UserViewModel(val application: Application) : ViewModel() {
     val userList: LiveData<List<User>>
     private val repository: UserRepository
     var userName = mutableStateOf("")
     var resultCheck = mutableStateOf(Any())
-    var userAge = mutableStateOf("12")
+    var userAge = mutableStateOf("")
     private val _foundUsers = MutableLiveData<Boolean>()
     val foundUsers: LiveData<Boolean> = _foundUsers
 
+    val getStringUserNameExists = application.getString(R.string.user_name_exists)
 
     init {
         // Строит базу данных (если она еще не существует)
@@ -40,6 +42,7 @@ class UserViewModel(application: Application) : ViewModel() {
 
     fun checkNameExists() {
         if (userName.value.isEmpty()) {
+            _foundUsers.postValue(false)
             return
         }
         viewModelScope.launch (Dispatchers.IO ) {
@@ -74,6 +77,7 @@ class UserViewModel(application: Application) : ViewModel() {
     fun deleteUser(id: Int) {
         repository.deleteUser(id)
     }
+
 }
 
 class UserViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
